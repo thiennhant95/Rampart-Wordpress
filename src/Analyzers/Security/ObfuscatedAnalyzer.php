@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Rampart\QualityChecker\Analyzers\Security;
 
+use Rampart\QualityChecker\Analyzers\AbstractAnalyzer;
 use Rampart\QualityChecker\Result\Confidence;
 use Rampart\QualityChecker\Result\Issue;
 use Rampart\QualityChecker\Result\Severity;
-use Rampart\QualityChecker\Scanning\ScanContextAware;
-use Rampart\QualityChecker\Scanning\ScanContextTrait;
 
-final class ObfuscatedAnalyzer implements ScanContextAware
+final class ObfuscatedAnalyzer extends AbstractAnalyzer
 {
-    use ScanContextTrait;
 
     private const RULE = 'OBFUSCATED_PHP';
 
@@ -34,6 +32,11 @@ final class ObfuscatedAnalyzer implements ScanContextAware
         $issues = [];
         foreach ($files as $file) {
             if (!$this->supports($file)) {
+                continue;
+            }
+            // Test files carry hex/base64 fixtures (llms.txt encoding vectors
+            // and the like) — forensics on tests/ has near-zero value.
+            if ($this->isTestPath($file)) {
                 continue;
             }
             $code = $this->sharedSource($file);
@@ -64,12 +67,13 @@ final class ObfuscatedAnalyzer implements ScanContextAware
                 continue;
             }
             // Hex escapes live inside string literals by definition, so
-            // stripping would blind this check. Require density instead:
-            // real payloads carry runs of escapes; short legit runs
-            // (BOM `\xEF\xBB\xBF`, newlines) stay silent below 4.
+            // stripping would blind this check. Require density instead.
             // Whitespace escapes (`\x09\x20…`, typical in sanitizer
             // whitespace lists — dogfood FP on real plugins) never count.
-            if (self::suspiciousHexCount($code) >= 4) {
+            // Floor is 6 non-whitespace escapes: fewer cannot hide anything
+            // meaningful (sanitizer char classes carry 4–5), while real
+            // payloads carry dozens.
+            if (self::suspiciousHexCount($code) >= 6) {
                 $issues[] = new Issue(
                     self::RULE,
                     'Obfuscated PHP detected: hex-encoded string.',
@@ -91,6 +95,15 @@ final class ObfuscatedAnalyzer implements ScanContextAware
 
     private static function suspiciousHexCount(string $code): int
     {
+        // Regex character classes (`[\x00-\x7F]`) are sanitizer idiom, not
+        // payloads: strip bracket spans that contain a range dash. Payload
+        // hex is written as escapes, so a literal `[...-...]` around it is
+        // rare by construction; plain arrays (`["\x41"]`) keep counting.
+        $code = preg_replace_callback(
+            '/\[(?:\\\\.|[^\[\]\\\\])*\]/',
+            static fn (array $m): string => str_contains($m[0], '-') ? '[]' : $m[0],
+            $code
+        ) ?? $code;
         if (preg_match_all(self::HEX_PATTERN, $code, $m) === false) {
             return 0;
         }
