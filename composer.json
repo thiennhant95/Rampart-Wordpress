@@ -1,0 +1,39 @@
+{
+    "name": "rampart/wp-quality-checker",
+    "description": "WordPress quality gate: WPCS, phpstan, phpunit, WP security heuristics (wpdb/nonce/capability/escaping).",
+    "keywords": ["wordpress", "quality", "phpcs", "phpstan", "security", "static-analysis", "ci"],
+    "license": "MIT",
+    "type": "library",
+    "bin": [
+        "bin/wp-check"
+    ],
+    "require": {
+        "php": "^8.1",
+        "nikic/php-parser": "^5.0",
+        "symfony/console": "^6.0|^7.0",
+        "symfony/process": "^6.0|^7.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "2.0",
+        "phpunit/phpunit": "^10.5|^11.0",
+        "squizlabs/php_codesniffer": "^3.13",
+        "wp-coding-standards/wpcs": "^3.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "phpcs --standard=phpcs.xml.dist src tests bin config",
+        "analyse": "phpstan analyse --memory-limit=1G --no-progress"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rampart\\QualityChecker\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "minimum-stability": "stable"
+}
