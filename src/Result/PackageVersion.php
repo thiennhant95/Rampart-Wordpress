@@ -29,6 +29,8 @@ final class PackageVersion
     public static function detect(?string $packageRoot = null): string
     {
         return self::fromComposerJson($packageRoot)
+            ?? self::fromVersionFile($packageRoot)
+            ?? self::fromGitDescribe($packageRoot)
             ?? self::fromInstalledVersions()
             ?? self::FALLBACK;
     }
@@ -41,6 +43,22 @@ final class PackageVersion
     public static function label(string $version): string
     {
         return preg_match('/^\d/', $version) === 1 ? 'v' . $version : $version;
+    }
+
+    /**
+     * Version stamped by tools/build-phar.php (single-file builds have no
+     * Composer runtime metadata to query).
+     */
+    private static function fromVersionFile(?string $packageRoot): ?string
+    {
+        $root = $packageRoot ?? dirname(__DIR__, 2);
+        $file = rtrim($root, '/\\') . DIRECTORY_SEPARATOR . 'VERSION';
+        if (!is_file($file)) {
+            return null;
+        }
+        $version = trim((string) file_get_contents($file));
+
+        return $version === '' ? null : $version;
     }
 
     private static function fromComposerJson(?string $packageRoot): ?string
@@ -59,6 +77,30 @@ final class PackageVersion
         $version = trim($data['version']);
 
         return $version === '' ? null : $version;
+    }
+
+    /**
+     * `git describe` in a checkout: works even when vendor metadata is stale
+     * (installed before the tag existed). Silent null without git or tags.
+     */
+    private static function fromGitDescribe(?string $packageRoot): ?string
+    {
+        $root = $packageRoot ?? dirname(__DIR__, 2);
+        if (!is_dir(rtrim($root, '/\\') . DIRECTORY_SEPARATOR . '.git')) {
+            return null;
+        }
+        $descriptors = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
+        $proc = @proc_open('git describe --tags --always', $descriptors, $pipes, $root);
+        if (!is_resource($proc)) {
+            return null;
+        }
+        fclose($pipes[0]);
+        $out = trim((string) stream_get_contents($pipes[1]));
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($proc);
+
+        return $out === '' ? null : ltrim($out, 'v');
     }
 
     private static function fromInstalledVersions(): ?string

@@ -11,6 +11,7 @@ parameters:
         - tests
         - bin
         - config
+        - tools
     excludePaths:
         - tests/*/fixtures/*
         - tests/**/fixtures/*

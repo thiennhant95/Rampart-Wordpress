@@ -8,6 +8,11 @@ Use this skill when you need a WordPress quality/security gate.
 
 ## Commands
 
+### Phar (no install, preferred when available)
+```bash
+php wp-check.phar /path/to/plugin --min-severity=error --fail-on=none --format=html
+```
+
 ### Calm first run (recommended)
 ```bash
 php -d memory_limit=1G bin/wp-check /path/to/plugin --min-severity=error --fail-on=none --format=json,html --output=reports/wp-checker
