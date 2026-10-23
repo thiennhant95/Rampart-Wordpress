@@ -7,11 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-24
+
 ### Added
 
+- Single-file `wp-check.phar` (`tools/build-phar.php`): no Composer needed to
+  run, `.sha256` sidecar, stamped version (`--version`), verified against a
+  consumer install (`vendor/bin/wp-check` proxy).
 - `--coverage` flag: opts into test-coverage checks for one run without
-  editing config (they default off).
-- Standalone help now says `bin/wp-check` (was the parent's binary name).
+  editing config (they default off); pinned both directions by test.
+- Remediation catalog (`why` + wrong/right fix) for all 8 WP rules — reports
+  no longer render empty fix sections.
+- Docs-pinning tests: README WP table, remediation coverage, standalone help
+  flags (a new rule/flag without docs fails the build).
+- Pro-grade docs: README rewrite + `docs/installation.md`, `docs/rules.md`
+  (TP/FP examples per rule), `docs/ci.md`, `docs/faq.md`.
+
+### Fixed (Yoast dogfood round)
+
+- `prepare()` result stays clean through variables; `phpcs:ignore/disable
+  WordPress.DB.*` honored as human review; hex-density ignores regex
+  character classes (`[\x00-\x7F]`); obfuscated scan skips `tests/`.
+- Correct submenu capability index; `--version` flag on all entry points;
+  `PackageVersion` reads the fork's package name (reports said `0.0.0`).
 
 ## [0.1.0] - 2026-10-23
 
