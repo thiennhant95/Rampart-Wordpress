@@ -21,7 +21,7 @@
     },
     "scripts": {
         "test": "phpunit",
-        "lint": "phpcs --standard=phpcs.xml.dist src tests bin config",
+        "lint": "phpcs --standard=phpcs.xml.dist src tests bin config tools",
         "analyse": "phpstan analyse --memory-limit=1G --no-progress"
     },
     "autoload": {

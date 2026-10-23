@@ -1,36 +1,50 @@
 # Rampart WP Checker
 
-One-command quality gate for WordPress plugins and themes (free, MIT).
-Forked from `rampart/quality-checker` (Laravel) — same engine, reports and
-exit codes, WordPress rule set. Status: **v0.1.0-dev, not on Packagist yet**
-(see SPEC.md §8 for the release checklist).
+One-command quality gate for WordPress plugins and themes. Static analysis,
+zero WordPress runtime needed — point it at a plugin folder and get a
+security report in seconds.
 
-## Requirements
+Free and MIT licensed. No account, no telemetry, no code leaves your machine.
 
-- PHP 8.1+ and Composer to **run** the tool. It can **scan** any PHP version
-  (WordPress 6.x still supports PHP 7.x code — covered by a fixture test).
+## Install (pick one)
 
-## Install (for now: clone)
+**1. Phar — easiest, no Composer (recommended)**
 
-```bash
-git clone <repo> wp-checker && cd wp-checker
-composer install --no-interaction
-```
-
-Packagist (`composer require rampart/wp-quality-checker`) lands with v0.1.0.
-
-## Quick start (5 minutes)
+Requires PHP 8.1+ and nothing else:
 
 ```bash
-# Calm first run: errors and criticals only, both formats
-php -d memory_limit=1G bin/wp-check /path/to/plugin \
-  --min-severity=error --fail-on=none --format=json,html \
-  --output=reports/wp-checker
-
-# Deep audit: everything, then triage
-php -d memory_limit=1G bin/wp-check /path/to/plugin \
-  --fail-on=none --format=all --output=reports/wp-checker
+# Download wp-check.phar + wp-check.phar.sha256 from GitHub Releases
+php -r "exit(hash_file('sha256','wp-check.phar') === trim(explode(' ',file_get_contents('wp-check.phar.sha256'))[0]) ? 0 : 1);" \
+  && echo "checksum OK"
+php wp-check.phar --version
 ```
+
+**2. Composer** (after Packagist submit — pending, see [#releases](#releases)):
+
+```bash
+composer require --dev rampart/wp-quality-checker
+php vendor/bin/wp-check /path/to/plugin
+```
+
+**3. From source:**
+
+```bash
+git clone <repo> && cd rampart-wp-checker && composer install
+php bin/wp-check /path/to/plugin
+```
+
+Details per OS: [`docs/installation.md`](docs/installation.md).
+
+## 60-second quick start
+
+```bash
+php wp-check.phar /path/to/my-plugin --min-severity=error --fail-on=none --format=html
+# → quality-report.html in ./reports/wp-checker (open in a browser)
+```
+
+Expected: a short list of `critical`/`error` findings with file:line and fix
+guidance — or a clean bill. The headline count mixes severities; see
+[How to read a report](#how-to-read-a-report).
 
 ## How to read a report
 
@@ -41,50 +55,68 @@ php -d memory_limit=1G bin/wp-check /path/to/plugin \
 | `warning` | Suspicious pattern, often safe (unescaped `echo`, missing nonce). | Backlog. Do not panic. |
 | `info` | Convention FYI (prefix, text domain). Never fails the build. | Read if curious. |
 
+A first scan with "50 findings" where 45 are warnings is normal — it is not
+50 vulnerabilities.
+
 ## WordPress rules (v0.1)
 
-| Rule | Severity | On by default | Fires when |
+| Rule | Severity | Default | Fires when |
 |---|---|---|---|
-| `WPDB_PREPARE` | error | yes | `$wpdb->query/get_results/get_var/get_row/get_col` with dynamic SQL and no `$wpdb->prepare()` |
-| `WP_UNESCAPED_OUTPUT` | warning | yes | `echo/print/<?=` without `esc_*()`/`wp_kses()`/cast (WPCS semantics) |
-| `WP_NONCE` | warning | yes | `admin_post_*`/`wp_ajax_*` handler without nonce verification |
-| `WP_CAPABILITY` | error | yes | privileged handler without `current_user_can()` (literal `add_*_page` capability counts as checked) |
-| `WP_CONFIG_SECRET` | warning | yes | empty/placeholder/short secret in `wp-config*.php` (samples skipped) |
-| `WP_ABSPATH` | warning | yes | plugin entry file without `defined('ABSPATH')` guard |
-| `WP_TABLE_PREFIX` | info | no | literal `wp_` table in SQL strings |
-| `WP_TEXTDOMAIN` | info | no | translation call without literal domain |
+| `WPDB_PREPARE` | error | on | `$wpdb->query/get_results/get_var/get_row/get_col` with dynamic SQL and no `$wpdb->prepare()` |
+| `WP_UNESCAPED_OUTPUT` | warning | on | `echo/print/<?=` without `esc_*()`/`wp_kses()`/cast (WPCS semantics) |
+| `WP_NONCE` | warning | on | `admin_post_*`/`wp_ajax_*` handler without nonce verification |
+| `WP_CAPABILITY` | error | on | privileged handler without `current_user_can()` (literal `add_*_page` capability counts as checked) |
+| `WP_CONFIG_SECRET` | warning | on | empty/placeholder/short secret in `wp-config*.php` (samples skipped) |
+| `WP_ABSPATH` | warning | on | plugin entry file without `defined('ABSPATH')` guard |
+| `WP_TABLE_PREFIX` | info | off | literal `wp_` table in SQL strings |
+| `WP_TEXTDOMAIN` | info | off | translation call without literal domain |
 
-Generic inherited rules (SQLi, XSS, command injection, SSRF, traversal,
-secrets, eval, JS/CSS syntax, perms, rogue/obfuscated PHP, …) behave exactly
-like the parent — see its README for that reference.
+Each rule with true/false examples: [`docs/rules.md`](docs/rules.md).
+Generic inherited rules (SQLi, XSS, command injection, SSRF, secrets, eval,
+JS/CSS syntax, …) behave like the parent Laravel tool.
+
+## Recipes
+
+```bash
+# Calm report for clients: errors and criticals only
+php wp-check.phar /path/to/plugin --min-severity=error --fail-on=none --format=html
+
+# Hide a noisy rule for now (temporary)
+php wp-check.phar /path/to/plugin --min-severity=error --fail-on=none --format=html \
+  --ignore=WP_UNESCAPED_OUTPUT
+
+# Legacy plugin: accept current findings, fail only on new ones
+php wp-check.phar /path/to/plugin --baseline-generate --fail-on=none
+php wp-check.phar /path/to/plugin --baseline-file=baseline.json
+```
+
+CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 
 ## Options (short)
 
 | Option | Effect |
 |---|---|
-| `--min-severity=error` | Hide warnings/info from reports (gate still uses `--fail-on`). Use when reports alarm readers. |
-| `--ignore=RULE,...` | Skip whole rules, e.g. `--ignore=WP_UNESCAPED_OUTPUT`. Dropped from reports, not just the gate. |
+| `--min-severity=error` | Hide warnings/info from reports (gate still uses `--fail-on`). |
+| `--ignore=RULE,...` | Skip whole rules. Dropped from reports, not just the gate. |
 | `--fail-on=none` | Review without failing (exit 0). |
 | `--exclude-path='*/vendor/*'` | Skip paths (repeatable). `vendor`/`node_modules`/`fixtures` already excluded. |
-| `--baseline-generate` / `--baseline-file` | Accept current findings; fail only on new ones after. |
+| `--format=json,html,sarif,md,console,all` | Report formats. SARIF feeds GitHub code scanning. |
+| `--version` | Print tool version. |
 
-## Known limits (v0.1, stated not discovered)
+Exit codes: `0` clean/review · `1` gate failed · `2` bad invocation · `3` internal error.
 
-- Heuristics, not proof: `call_user_func($dynamic)` flags even behind
-  `is_callable` guards; `include` with `basename()` still flags; unknown
-  function params are treated as clean (cross-function taint = v0.2).
-- No precision claims yet: the 100-case corpus + holdout lands in v0.2.
-- Standalone only (no WP-CLI command). Scans code, never boots WordPress.
+## Honest limits (v0.1)
 
-## Troubleshooting
+- Heuristics, not proof. No precision claims yet — the 100-case corpus lands in v0.2.
+- `call_user_func($dynamic)` flags behind `is_callable` guards; `include` with `basename()` still flags; unknown function params are clean.
+- Standalone only. Scans code, never boots WordPress.
 
-**Too many findings on the first run?** Start with
-`--min-severity=error`, then `--ignore` whole noisy rules temporarily, then
-`--baseline-generate` and fail only on new findings.
+Troubleshooting & FAQ: [`docs/faq.md`](docs/faq.md).
 
-**A finding looks wrong?** Read the file:line, check the TN column in
-SPEC.md §5 for the rule's documented blind spots, then baseline it with a
-comment or `--ignore` — do not fork the analyzer per project.
+## Releases
+
+- GitHub Releases carry `wp-check.phar` + `.sha256` per tag.
+- Packagist (`rampart/wp-quality-checker`): pending submit — Composer path unlocks then.
 
 ## License
 

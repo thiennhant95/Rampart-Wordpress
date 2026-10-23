@@ -57,11 +57,19 @@ if ($autoload === null) {
 }
 require $autoload;
 
+use Rampart\QualityChecker\Result\PackageVersion;
 use Rampart\QualityChecker\Standalone\StandaloneRunner;
 use Symfony\Component\Console\Output\StreamOutput;
 
 $argv = $_SERVER['argv'] ?? [];
 array_shift($argv);
+
+foreach ($argv as $flag) {
+    if ($flag === '--version' || $flag === '-V') {
+        echo 'rampart wp-check ' . PackageVersion::label(PackageVersion::detect(dirname(__DIR__))) . "\n";
+        exit(0);
+    }
+}
 
 $output = new StreamOutput(fopen('php://stdout', 'w'));
 exit((new StandaloneRunner($argv))->run($output, dirname(__DIR__)));
