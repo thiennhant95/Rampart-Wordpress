@@ -86,6 +86,7 @@ final class StandaloneRunner
         $config = $this->loadConfig($toolRoot);
         $config = $this->mergeExcludePaths($config);
         $config = $this->mergeGateIgnore($config);
+        $config = $this->mergeCoverageOptIn($config);
         $target = $this->target;
         $ctx = new CheckContext(
             $target,
@@ -190,6 +191,29 @@ final class StandaloneRunner
             $this->split($this->options['ignore'] ?? '')
         )));
         $config['quality_gate'] = $gate;
+
+        return $config;
+    }
+
+    /**
+     * `--coverage` opts into the test-coverage analyzers for one run, without
+     * editing any config file.
+     *
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
+    private function mergeCoverageOptIn(array $config): array
+    {
+        if (!isset($this->options['coverage'])) {
+            return $config;
+        }
+        if (!isset($config['analyzers']) || !is_array($config['analyzers'])) {
+            $config['analyzers'] = [];
+        }
+        if (!isset($config['analyzers']['test_coverage']) || !is_array($config['analyzers']['test_coverage'])) {
+            $config['analyzers']['test_coverage'] = [];
+        }
+        $config['analyzers']['test_coverage']['unified'] = true;
 
         return $config;
     }
@@ -365,7 +389,7 @@ final class StandaloneRunner
 
     private function printHelp(OutputInterface $output): void
     {
-        $output->writeln('Usage: php bin/quality-check <target-dir> [options]');
+        $output->writeln('Usage: php bin/wp-check <target-dir> [options]');
         $output->writeln('  --format=console|json|html|md|sarif|all (default: console)');
         $output->writeln('  --tier=security|quality|all  --only=custom,...  --exclude=...');
         $output->writeln('  --fail-on=none|info|warning|error|critical  --min-confidence=low|medium|high');
@@ -373,7 +397,8 @@ final class StandaloneRunner
         $output->writeln('  --output=<dir>  --path=<sub> (repeatable)  --no-cache  --profile');
         $output->writeln('  --exclude-path=<glob> (repeatable, e.g. */fixtures/*)  merges with analyzers.exclude_paths');
         $output->writeln('  --baseline-file=<file>  --baseline-generate  --baseline-update  --help');
-        $output->writeln('  --ignore=RULE,...  skip rules (e.g. OWASP_BLADE_XSS,MISSING_MODEL_TEST)');
+        $output->writeln('  --ignore=RULE,...  skip rules (e.g. WP_UNESCAPED_OUTPUT,MISSING_MODEL_TEST)');
+        $output->writeln('  --coverage  opt into test-coverage checks for this run (off by default)');
         $output->writeln('Default --only=custom: static analyzers only, no target vendor needed.');
     }
 }

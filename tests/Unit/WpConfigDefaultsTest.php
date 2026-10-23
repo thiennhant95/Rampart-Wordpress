@@ -7,6 +7,8 @@ namespace Rampart\QualityChecker\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use Rampart\QualityChecker\Checkers\CustomAnalyzerChecker;
 use Rampart\QualityChecker\Runner\CheckContext;
+use Rampart\QualityChecker\Standalone\StandaloneRunner;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * Test-coverage checks are OPT-IN, never default.
@@ -55,7 +57,10 @@ final class WpConfigDefaultsTest extends TestCase
         return $config;
     }
 
-    /** @param array<string, mixed> $config */
+    /**
+     * @param array<string, mixed> $config
+     * @return list<string>
+     */
     private function rulesFor(array $config): array
     {
         $ctx = new CheckContext($this->tmp, ['app', 'tests'], $config, $this->tmp . DIRECTORY_SEPARATOR . 'out');
@@ -99,5 +104,45 @@ final class WpConfigDefaultsTest extends TestCase
             static fn (string $rule): bool => str_starts_with($rule, 'MISSING_')
         ));
         self::assertNotSame([], $missing, 'Opting in must report missing-test findings.');
+    }
+
+    public function testCoverageFlagOptsInForOneRun(): void
+    {
+        $out = $this->tmp . DIRECTORY_SEPARATOR . 'out-cov';
+        @mkdir($out, 0777, true);
+
+        $run = function (array $extra) use ($out): array {
+            // Unique output per run: the result cache would otherwise serve
+            // the first run's issues to the second.
+            $runOut = $out . '-' . uniqid('', true);
+            @mkdir($runOut, 0777, true);
+            $output = new BufferedOutput();
+            $code = (new StandaloneRunner(array_merge([
+                $this->tmp,
+                '--format=json',
+                '--tier=security',
+                '--fail-on=none',
+                '--output=' . $runOut,
+            ], $extra)))->run($output, dirname(__DIR__, 2));
+            self::assertSame(0, $code);
+            $payload = json_decode((string) file_get_contents($runOut . DIRECTORY_SEPARATOR . 'quality-report.json'), true);
+            $rules = [];
+            foreach ($payload['checkers'] as $checker) {
+                foreach ($checker['issues'] ?? [] as $issue) {
+                    $rules[] = $issue['rule'];
+                }
+            }
+
+            return $rules;
+        };
+
+        foreach ($run([]) as $rule) {
+            self::assertStringStartsNotWith('MISSING_', $rule, 'Default scan must not report missing-test findings.');
+        }
+        $missing = array_values(array_filter(
+            $run(['--coverage']),
+            static fn (string $rule): bool => str_starts_with($rule, 'MISSING_')
+        ));
+        self::assertNotSame([], $missing, '--coverage did not bring back missing-test findings.');
     }
 }
