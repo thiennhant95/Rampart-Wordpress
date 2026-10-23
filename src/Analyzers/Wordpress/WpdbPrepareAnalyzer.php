@@ -78,6 +78,9 @@ final class WpdbPrepareAnalyzer extends AbstractAnalyzer
                 if (!$this->isWpTainted($arg->value, $origins)) {
                     continue;
                 }
+                if ($this->hasWpcsReview($file, $call->getStartLine())) {
+                    continue;
+                }
                 $issues[] = $this->makeIssue(
                     self::RULE,
                     sprintf('Unprepared $wpdb->%s() with dynamic SQL — use $wpdb->prepare() with placeholders.', $call->name->toString()),
@@ -91,6 +94,29 @@ final class WpdbPrepareAnalyzer extends AbstractAnalyzer
         }
 
         return $issues;
+    }
+
+    /**
+     * A `phpcs:ignore`/`phpcs:disable WordPress.DB.*` comment on or above the
+     * call line is explicit human review (Yoast marks prepared queries this
+     * way) — the same deference the tool gives its own inline-suppress
+     * comments.
+     */
+    private function hasWpcsReview(string $file, int $line): bool
+    {
+        $code = $this->sharedSource($file);
+        if ($code === '') {
+            return false;
+        }
+        $lines = explode("\n", $code);
+        for ($i = max(0, $line - 3); $i < $line && $i < count($lines); $i++) {
+            $trimmed = $lines[$i] ?? '';
+            if ((str_contains($trimmed, 'phpcs:ignore') || str_contains($trimmed, 'phpcs:disable')) && str_contains($trimmed, 'WordPress.DB')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isPrepareCall(Node\Expr $expr): bool
@@ -149,6 +175,13 @@ final class WpdbPrepareAnalyzer extends AbstractAnalyzer
         }
         if ($expr instanceof Node\Expr\ArrayDimFetch) {
             return $this->isWpTainted($expr->var, $origins);
+        }
+        // A prepare() result is clean even through a variable ($sql =
+        // $wpdb->prepare(...); $wpdb->query($sql)) — dogfood FP on Yoast.
+        if ($expr instanceof Node\Expr\MethodCall && $expr->name instanceof Node\Identifier) {
+            if (strtolower($expr->name->toString()) === 'prepare') {
+                return false;
+            }
         }
 
         return $this->isTaintedExpr($expr);

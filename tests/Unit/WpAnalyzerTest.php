@@ -86,11 +86,32 @@ final class WpAnalyzerTest extends TestCase
         self::assertSame(['WPDB_PREPARE'], $this->rules(new WpdbPrepareAnalyzer(), $f));
     }
 
+    public function testWpdbSilentOnPrepareVariable(): void
+    {
+        // Dogfood FP (Yoast): $sql = $wpdb->prepare(...); $wpdb->query($sql).
+        $f = $this->file('a.php', "<?php\n\$sql = \$wpdb->prepare(\"DELETE FROM t WHERE id = %d\", \$id);\n\$wpdb->query(\$sql);\n");
+        self::assertSame([], $this->rules(new WpdbPrepareAnalyzer(), $f));
+    }
+
+    public function testWpdbSilentOnPhpcsDisable(): void
+    {
+        // Dogfood FP (Yoast indexable-cleanup): phpcs:disable review marker.
+        $f = $this->file('a.php', "<?php\n\$t = \$_GET['t'];\n// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- Reason: safe.\n\$rows = \$wpdb->query(\"SELECT * FROM t WHERE x = '\$t'\");\n");
+        self::assertSame([], $this->rules(new WpdbPrepareAnalyzer(), $f));
+    }
+
     // --- WPDB_PREPARE: 5 TN ---
 
     public function testWpdbSilentOnPrepare(): void
     {
         $f = $this->file('a.php', "<?php\n\$rows = \$wpdb->query(\$wpdb->prepare(\"SELECT * FROM t WHERE id = %d\", \$id));\n");
+        self::assertSame([], $this->rules(new WpdbPrepareAnalyzer(), $f));
+    }
+
+    public function testWpdbSilentOnWpcsReviewedQuery(): void
+    {
+        // Dogfood (Yoast): explicit human review via phpcs:ignore is honored.
+        $f = $this->file('a.php', "<?php\n\$t = \$_GET['t'];\n// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Reason: safe.\n\$rows = \$wpdb->query(\"SELECT * FROM t WHERE x = '\$t'\");\n");
         self::assertSame([], $this->rules(new WpdbPrepareAnalyzer(), $f));
     }
 

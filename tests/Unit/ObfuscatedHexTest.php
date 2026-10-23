@@ -46,9 +46,36 @@ final class ObfuscatedHexTest extends TestCase
     public function testRealHexRunStillFlags(): void
     {
         $bs = chr(92);
-        $f = $this->file('<?php $a = "' . $bs . 'x65' . $bs . 'x76' . $bs . 'x61' . $bs . 'x6c";' . "\n");
+        $f = $this->file('<?php $a = "' . $bs . 'x65' . $bs . 'x76' . $bs . 'x61' . $bs . 'x6c' . $bs . 'x20' . $bs . 'x77' . $bs . 'x6f' . $bs . 'x72' . $bs . 'x6c' . $bs . 'x64";' . "\n");
         $issues = (new ObfuscatedAnalyzer())->analyze([$f]);
         self::assertCount(1, $issues);
         self::assertSame('OBFUSCATED_PHP', $issues[0]->rule);
+    }
+
+    public function testShortNonWsRunStaysSilent(): void
+    {
+        // 5 non-whitespace escapes (sanitizer char-class shape): below the
+        // floor of 6, silent by design.
+        $bs = chr(92);
+        $f = $this->file('<?php $a = "' . $bs . 'x00' . $bs . 'x1F' . $bs . 'x7F' . $bs . 'xFF' . $bs . 'x41";' . "\n");
+        self::assertSame([], (new ObfuscatedAnalyzer())->analyze([$f]));
+    }
+
+    public function testRegexCharClassStaysSilent(): void
+    {
+        // Dogfood (Yoast custom-loader): sanitizer range class, 12 escapes.
+        $f = $this->file('<?php $a = "/[^\\x00-\\x7F\\x80-\\xFF]/";' . "\n");
+        self::assertSame([], (new ObfuscatedAnalyzer())->analyze([$f]));
+    }
+
+    public function testSkipsTestPaths(): void
+    {
+        // Dogfood (Yoast Handle_Test): hex fixtures in tests/ are not backdoors.
+        $dir = $this->tmp . DIRECTORY_SEPARATOR . 'tests';
+        @mkdir($dir, 0777, true);
+        $path = $dir . DIRECTORY_SEPARATOR . 'Hex_Test.php';
+        $bs = chr(92);
+        file_put_contents($path, '<?php $a = "' . $bs . 'x65' . $bs . 'x76' . $bs . 'x61' . $bs . 'x6c' . $bs . 'x20' . $bs . 'x77' . $bs . 'x6f' . $bs . 'x72' . $bs . 'x6c' . $bs . 'x64";' . "\n");
+        self::assertSame([], (new ObfuscatedAnalyzer())->analyze([$path]));
     }
 }
