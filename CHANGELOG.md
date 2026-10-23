@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `--coverage` flag: opts into test-coverage checks for one run without
+  editing config (they default off).
+- Standalone help now says `bin/wp-check` (was the parent's binary name).
+
 ## [0.1.0] - 2026-10-23
 
 ### Added (initial release — fork of rampart/quality-checker v1.5.6)
