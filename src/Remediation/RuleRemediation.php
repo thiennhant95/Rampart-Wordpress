@@ -586,6 +586,99 @@ final class RuleRemediation
                     CODE,
                 'docs' => null,
             ],
+            'WPDB_PREPARE' => [
+                'why' => 'Dynamic SQL reaches $wpdb without prepare(): user input concatenated into the query string runs as SQL.',
+                'fix' => <<<'CODE'
+                    // WRONG: interpolated input
+                    $rows = $wpdb->query("SELECT * FROM t WHERE id = $id");
+
+                    // RIGHT: placeholders (or the bound insert/update/delete API)
+                    $rows = $wpdb->query($wpdb->prepare("SELECT * FROM t WHERE id = %d", $id));
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_UNESCAPED_OUTPUT' => [
+                'why' => 'Dynamic content echoed without an escaping function renders as HTML/JS in the browser (stored/reflected XSS).',
+                'fix' => <<<'CODE'
+                    // WRONG: raw output
+                    echo $name;
+
+                    // RIGHT: escape at output (translation alone is not escaping)
+                    echo esc_html($name);
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_NONCE' => [
+                'why' => 'A state-changing handler (admin_post_*/wp_ajax_*) with no nonce check accepts forged cross-site requests.',
+                'fix' => <<<'CODE'
+                    // WRONG: no verification
+                    function my_save() { update_option('k', $_POST['v']); }
+
+                    // RIGHT: verify first
+                    function my_save() {
+                        check_admin_referer('my-action');
+                        update_option('k', $_POST['v']);
+                    }
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_CAPABILITY' => [
+                'why' => 'A privileged handler (ajax/admin page) with no capability check runs for any logged-in user, regardless of role.',
+                'fix' => <<<'CODE'
+                    // WRONG: no role check
+                    function cb_drop() { wp_delete_post(1); }
+
+                    // RIGHT: check capability (or pass a literal one to add_*_page)
+                    function cb_drop() {
+                        if (!current_user_can('manage_options')) {
+                            return;
+                        }
+                        wp_delete_post(1);
+                    }
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_CONFIG_SECRET' => [
+                'why' => 'Empty, placeholder or short secrets in wp-config*.php: anyone reading the file (backups, repos, error pages) owns the site.',
+                'fix' => <<<'CODE'
+                    // WRONG: placeholder or short value
+                    define('AUTH_KEY', 'changeme');
+
+                    // RIGHT: long random value (e.g. from api.wordpress.org secret-key service)
+                    define('AUTH_KEY', 'tRx67#kL0pQwErTyUiOpAsDfGhJkLzXcVbNmQaZ!@#');
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_ABSPATH' => [
+                'why' => 'A plugin entry file without an ABSPATH guard executes on direct web access, outside WordPress bootstrap.',
+                'fix' => <<<'CODE'
+                    // Add as the first statement after the plugin header:
+                    defined('ABSPATH') || exit;
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_TABLE_PREFIX' => [
+                'why' => 'A literal wp_ table name breaks sites that renamed the database prefix.',
+                'fix' => <<<'CODE'
+                    // WRONG: hardcoded prefix
+                    $sql = "SELECT * FROM wp_posts";
+
+                    // RIGHT: dynamic prefix
+                    $sql = "SELECT * FROM " . $wpdb->prefix . "posts";
+                    CODE,
+                'docs' => null,
+            ],
+            'WP_TEXTDOMAIN' => [
+                'why' => 'A translation call without a literal text domain cannot be translated (untranslatable or runtime-resolved strings).',
+                'fix' => <<<'CODE'
+                    // WRONG: no domain
+                    $s = __('Save');
+
+                    // RIGHT: literal domain (and escape at output)
+                    $s = __('Save', 'my-plugin');
+                    CODE,
+                'docs' => null,
+            ],
         ];
     }
 
