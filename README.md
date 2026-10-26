@@ -86,9 +86,22 @@ php wp-check.phar /path/to/plugin --min-severity=error --fail-on=none --format=h
   --ignore=WP_UNESCAPED_OUTPUT
 
 # Legacy plugin: accept current findings, fail only on new ones
-php wp-check.phar /path/to/plugin --baseline-generate --fail-on=none
-php wp-check.phar /path/to/plugin --baseline-file=baseline.json
+php bin/wp-check /path/to/plugin --baseline-generate --fail-on=none
+php bin/wp-check /path/to/plugin --baseline-file=baseline.json
 ```
+
+Two report modes: findings-only (where the problems are) vs findings plus
+how-to-fix guidance (default). Clients get the first, developers the second:
+
+```bash
+# Findings only — no fix boxes, no remediation section
+php bin/wp-check /path/to/plugin --no-remediation --fail-on=none --format=html
+
+# Findings + fix (default) — or set remediation: false in config/wp-checker.php
+php bin/wp-check /path/to/plugin --fail-on=none --format=html
+```
+
+Machine reports (JSON/SARIF) always carry full data either way.
 
 CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 

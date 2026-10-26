@@ -19,11 +19,11 @@ final class MarkdownReporter implements ReporterInterface
         $summary = $this->buildSummary($results);
 
         $lines = [];
-        $lines[] = '# Laravel Quality Report';
+        $lines[] = '# WordPress Quality Report';
         $lines[] = '';
         $lines[] = '<div align="center">';
         $lines[] = '';
-        $lines[] = '*🛡️ Comprehensive quality gate for Laravel — security, tests & conventions*';
+        $lines[] = '*🛡️ Quality gate for WordPress plugins and themes — security, tests & conventions*';
         $lines[] = '';
         $lines[] = '</div>';
         $lines[] = '';
@@ -45,7 +45,9 @@ final class MarkdownReporter implements ReporterInterface
         $lines[] = '- [Action Plan](#action-plan)';
         $lines[] = '- [Top Rules](#top-rules)';
         $lines[] = '- [OWASP](#owasp)';
-        $lines[] = '- [Remediation](#remediation)';
+        if ($ctx->showRemediation()) {
+            $lines[] = '- [Remediation](#remediation)';
+        }
         $lines[] = '- [Per-Checker](#per-checker)';
         $lines[] = '- [Issues](#issues)';
         foreach ($results as $result) {
@@ -131,8 +133,10 @@ final class MarkdownReporter implements ReporterInterface
             $lines[] = '';
         }
 
-        foreach ($this->remediationBlocks($results) as $block) {
-            $lines[] = $block;
+        if ($ctx->showRemediation()) {
+            foreach ($this->remediationBlocks($results) as $block) {
+                $lines[] = $block;
+            }
         }
 
         $lines[] = '## Per-Checker';
