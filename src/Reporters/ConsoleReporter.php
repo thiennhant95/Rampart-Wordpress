@@ -34,7 +34,7 @@ final class ConsoleReporter implements ReporterInterface
         }
 
         $this->output->writeln('');
-        $this->output->writeln('<fg=cyan>Laravel Quality Checker</> <options=bold>' . PackageVersion::label($ctx->packageVersion) . '</>');
+        $this->output->writeln('<fg=cyan>Rampart WP Checker</> <options=bold>' . PackageVersion::label($ctx->packageVersion) . '</>');
         $this->output->writeln('Generated: ' . (new \DateTimeImmutable())->format('Y-m-d H:i:s'));
         $this->output->writeln(sprintf(
             'Tier: %s | Fail-on: %s | Min-confidence: %s',
@@ -104,7 +104,9 @@ final class ConsoleReporter implements ReporterInterface
         $this->printOwaspFindings($results);
         $this->printTopRules($results);
         $this->printIssues($results);
-        $this->printRemediation($results);
+        if ($ctx->showRemediation()) {
+            $this->printRemediation($results);
+        }
     }
 
     private function renderSummaryLine(array $results): void

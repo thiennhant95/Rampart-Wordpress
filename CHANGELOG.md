@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Readable HTML reports (ported): How-to-read box, slim severity-only
+  Summary, P0 fix-now table (capped at 20, collapsed), Action Plan up front,
+  OWASP + methodology appendix at the end; WordPress branding throughout.
+- `--no-remediation` flag + `remediation` config (default on): findings-only
+  mode for human reports; JSON/SARIF keep full data.
+- OWASP drill-down obeys the severity chips (blocks hide, pills recount).
+- Tests `101→107`; `phpstan [OK]`, `phpcs` clean.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added

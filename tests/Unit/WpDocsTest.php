@@ -68,7 +68,7 @@ final class WpDocsTest extends TestCase
 
         self::assertSame(0, $code);
         $help = $output->fetch();
-        foreach (['--min-severity', '--ignore', '--format=', '--exclude-path', '--baseline-file'] as $flag) {
+        foreach (['--min-severity', '--ignore', '--no-remediation', '--coverage', '--format=', '--exclude-path', '--baseline-file'] as $flag) {
             self::assertStringContainsString($flag, $help, $flag . ' missing from standalone help.');
         }
     }
