@@ -1,6 +1,6 @@
 # Rampart WP Checker
 
-[![GitHub release](https://img.shields.io/github/v/release/VietVang-JSC/-rampart-wp-checker)](https://github.com/VietVang-JSC/-rampart-wp-checker/releases)
+[![GitHub release](https://img.shields.io/github/v/release/VietVang-JSC/rampart-wp-checker)](https://github.com/VietVang-JSC/rampart-wp-checker/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PHP ^8.1](https://img.shields.io/badge/PHP-%5E8.1-777BB4.svg)](composer.json)
 
@@ -28,7 +28,7 @@ php wp-check.phar --version
 **2. Composer via GitHub** (until the Packagist submit lands):
 
 ```bash
-composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/-rampart-wp-checker
+composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
 composer require --dev rampart/wp-quality-checker:^0.3
 php vendor/bin/wp-check /path/to/plugin
 ```
@@ -38,7 +38,7 @@ php vendor/bin/wp-check /path/to/plugin
 **4. From source:**
 
 ```bash
-git clone https://github.com/VietVang-JSC/-rampart-wp-checker && cd -rampart-wp-checker
+git clone https://github.com/VietVang-JSC/rampart-wp-checker && cd rampart-wp-checker
 composer install --no-interaction
 php bin/wp-check /path/to/plugin
 ```

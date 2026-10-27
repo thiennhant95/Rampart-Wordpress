@@ -25,7 +25,7 @@
 ## Option B — Composer via GitHub (verified working)
 
 ```bash
-composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/-rampart-wp-checker
+composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
 composer require --dev rampart/wp-quality-checker:^0.3
 php vendor/bin/wp-check /path/to/plugin
 ```

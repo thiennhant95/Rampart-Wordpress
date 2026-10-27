@@ -15,7 +15,7 @@ jobs:
           php-version: '8.2'
       - name: Download wp-check
         run: |
-          curl -sL -o wp-check.phar https://github.com/VietVang-JSC/-rampart-wp-checker/releases/latest/download/wp-check.phar
+          curl -sL -o wp-check.phar https://github.com/VietVang-JSC/rampart-wp-checker/releases/latest/download/wp-check.phar
       - name: Scan (fail on error+)
         run: php wp-check.phar . --fail-on=error --format=sarif,console --output=reports/
       - name: Upload SARIF
@@ -37,7 +37,7 @@ Notes:
 wp-check:
   image: php:8.2-cli
   script:
-    - curl -sL -o wp-check.phar https://github.com/VietVang-JSC/-rampart-wp-checker/releases/latest/download/wp-check.phar
+    - curl -sL -o wp-check.phar https://github.com/VietVang-JSC/rampart-wp-checker/releases/latest/download/wp-check.phar
     - php wp-check.phar . --fail-on=error --format=json --output=reports/
   artifacts:
     paths: [reports/]
