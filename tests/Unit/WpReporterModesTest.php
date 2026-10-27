@@ -46,14 +46,32 @@ final class WpReporterModesTest extends TestCase
         ];
     }
 
-    /** @param array<string, mixed> $config */
-    private function renderHtml(array $config = []): string
+    /**
+     * @param array<string, mixed> $config
+     * @param list<array<string, mixed>>|null $rawIssues
+     */
+    private function renderHtml(array $config = [], ?array $rawIssues = null): string
     {
         $this->tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'qc-wprep-' . uniqid('', true);
         @mkdir($this->tmp, 0777, true);
         $defaults = ['html' => ['repo_url' => null, 'branch' => 'main', 'code_context' => 0]];
         $ctx = new CheckContext($this->tmp, ['.'], array_replace_recursive($defaults, $config), $this->tmp, packageVersion: '0.1.0');
-        (new HtmlReporter())->render($this->results(), $ctx);
+        $results = $rawIssues === null
+            ? $this->results()
+            : [new CheckResult('custom', 'failed', 0.1, array_map(
+                static fn (array $r): Issue => new Issue(
+                    $r['rule'],
+                    'm',
+                    'f.php',
+                    1,
+                    Severity::from($r['severity']),
+                    'custom',
+                    [],
+                    Confidence::from($r['confidence'])
+                ),
+                $rawIssues
+            ), null, '')];
+        (new HtmlReporter())->render($results, $ctx);
 
         return (string) file_get_contents($this->tmp . DIRECTORY_SEPARATOR . 'quality-report.html');
     }
@@ -102,6 +120,59 @@ final class WpReporterModesTest extends TestCase
     public function testRemediationShownByDefault(): void
     {
         self::assertStringContainsString('class="fixbox"', $this->renderHtml());
+    }
+
+    public function testSummaryStaysSlim(): void
+    {
+        $html = $this->renderHtml();
+        $start = strpos($html, 'id="summary"');
+        self::assertIsInt($start);
+        $section = substr($html, $start, 2500);
+
+        foreach (['Total Issues', 'Severity distribution'] as $kept) {
+            self::assertStringContainsString($kept, $section);
+        }
+        // Stat-tile labels (not the priority legend further down).
+        foreach (['>Checkers</div>', '>P0</div>', '<h3>Top rules</h3>'] as $dropped) {
+            self::assertStringNotContainsString($dropped, $section);
+        }
+    }
+
+    public function testRiskTableShowsPrioritySplit(): void
+    {
+        $html = $this->renderHtml();
+        $start = strpos($html, 'id="risk-overview"');
+        self::assertIsInt($start);
+        $section = substr($html, $start, 2500);
+
+        foreach (['P0', 'P1', 'P2', 'P3', 'Action'] as $needle) {
+            self::assertStringContainsString($needle, $section);
+        }
+    }
+
+    public function testOwaspRulesCarrySeverityBreakdown(): void
+    {
+        $html = $this->renderHtml([], [
+            ['rule' => 'OWASP_SSRF', 'severity' => 'error', 'confidence' => 'high'],
+            ['rule' => 'OWASP_BLADE_XSS', 'severity' => 'warning', 'confidence' => 'medium'],
+        ]);
+
+        self::assertStringContainsString('data-err="1"', $html);
+        self::assertStringContainsString('data-warn="1"', $html);
+        self::assertStringContainsString('owasp-count', $html);
+    }
+
+    public function testFixNowCollapsesByDefault(): void
+    {
+        $html = $this->renderHtml([], [
+            ['rule' => 'OWASP_SSRF', 'severity' => 'critical', 'confidence' => 'high'],
+        ]);
+        $start = strpos($html, 'id="fix-now"');
+        self::assertIsInt($start);
+        $section = substr($html, $start, 1500);
+
+        self::assertStringContainsString('<details>', $section);
+        self::assertStringNotContainsString('<details open', $section);
     }
 
     public function testRemediationHiddenWhenDisabled(): void
