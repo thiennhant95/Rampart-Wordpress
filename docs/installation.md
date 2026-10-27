@@ -22,16 +22,23 @@
 3. Run: `php wp-check.phar --version` → e.g. `rampart wp-check v0.1.0`.
    If you see a version, you are done.
 
-## Option B — Composer (after Packagist submit)
+## Option B — Composer via GitHub (verified working)
 
 ```bash
-composer require --dev rampart/wp-quality-checker
+composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/-rampart-wp-checker
+composer require --dev rampart/wp-quality-checker:^0.3
 php vendor/bin/wp-check /path/to/plugin
 ```
 
-Until the Packagist submit lands, use Option A or C.
+## Option C — Composer via Packagist (pending submit)
 
-## Option C — From source
+```bash
+composer require --dev rampart/wp-quality-checker
+```
+
+Until the Packagist submit lands, use A, B or D.
+
+## Option D — From source
 
 ```bash
 git clone <repo> rampart-wp-checker && cd rampart-wp-checker
