@@ -34,7 +34,9 @@ final class QualityScore
 
     /**
      * Rule substrings per dimension, checked in order. Anything unmatched
-     * lands in Laravel Best Practices.
+     * lands in General. WordPress security rules map to Security so priority
+     * (P0/P1) treats them as security findings; the two convention-grade WP
+     * rules map to Maintainability.
      *
      * @var array<string, list<string>>
      */
@@ -43,12 +45,14 @@ final class QualityScore
             'OWASP_', 'UNSAFE_', 'INSECURE_', 'HARDCODED_SECRET', 'MASS_ASSIGNMENT',
             'SQL_INJECTION', 'SESSION_FIXATION', 'DISABLED_CSRF', 'CVE', 'GHSA',
             'COMPOSER_ADVISOR', 'VULNERAB',
+            'WPDB_PREPARE', 'WP_UNESCAPED_OUTPUT', 'WP_NONCE', 'WP_CAPABILITY',
+            'WP_CONFIG_SECRET', 'WP_ABSPATH',
         ],
         'Database' => ['MIGRATION_'],
         'Testability' => ['MISSING_', 'COVERAGE', 'TEST_'],
-        'Maintainability' => ['DEAD_CODE', 'NAMING_CONVENTION', 'TODO_FIXME', 'CONVENTION'],
+        'Maintainability' => ['DEAD_CODE', 'NAMING_CONVENTION', 'TODO_FIXME', 'CONVENTION', 'WP_TABLE_PREFIX', 'WP_TEXTDOMAIN'],
         'Reliability' => ['ROUTE_MISSING_VALIDATION', 'LARAVEL_PITFALL'],
-        'Laravel Best Practices' => [],
+        'General' => [],
     ];
 
     /**
@@ -238,7 +242,7 @@ final class QualityScore
             }
         }
 
-        return 'Laravel Best Practices';
+        return 'General';
     }
 
     /**
