@@ -19,17 +19,21 @@ php -r "exit(hash_file('sha256','wp-check.phar') === trim(explode(' ',file_get_c
 php wp-check.phar --version
 ```
 
-**2. Composer** (after Packagist submit — pending, see [#releases](#releases)):
+**2. Composer via GitHub** (until the Packagist submit lands):
 
 ```bash
-composer require --dev rampart/wp-quality-checker
+composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/-rampart-wp-checker
+composer require --dev rampart/wp-quality-checker:^0.3
 php vendor/bin/wp-check /path/to/plugin
 ```
 
-**3. From source:**
+**3. Composer via Packagist** (pending submit): `composer require --dev rampart/wp-quality-checker`.
+
+**4. From source:**
 
 ```bash
-git clone <repo> && cd rampart-wp-checker && composer install
+git clone https://github.com/VietVang-JSC/-rampart-wp-checker && cd -rampart-wp-checker
+composer install --no-interaction
 php bin/wp-check /path/to/plugin
 ```
 
