@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Rampart\QualityChecker\Reporters\ConsoleReporter;
 use Rampart\QualityChecker\Reporters\HtmlReporter;
 use Rampart\QualityChecker\Reporters\MarkdownReporter;
+use Rampart\QualityChecker\Reporters\QualityScore;
 use Rampart\QualityChecker\Result\CheckResult;
 use Rampart\QualityChecker\Result\Confidence;
 use Rampart\QualityChecker\Result\Issue;
@@ -63,6 +64,30 @@ final class WpReporterModesTest extends TestCase
 
         self::assertStringContainsString('WordPress Quality Report', $html);
         self::assertStringNotContainsString('Laravel Quality Report', $html);
+        self::assertStringNotContainsString('Laravel Best Practices', $html);
+    }
+
+    public function testWordpressSecurityRulesCountAsSecurity(): void
+    {
+        // WPDB_PREPARE error/medium must be P1 (security), not P2/P3.
+        self::assertSame('P1', QualityScore::priorityFor('WPDB_PREPARE', 'custom', 'error', 'medium'));
+        self::assertSame('P1', QualityScore::priorityFor('WP_CAPABILITY', 'custom', 'warning', 'medium'));
+
+        $results = [
+            new CheckResult('custom', 'failed', 0.1, [
+                new Issue('WPDB_PREPARE', 'm', 'db.php', 1, Severity::Error, 'custom', [], Confidence::Medium),
+                new Issue('WP_TABLE_PREFIX', 'm', 'db.php', 2, Severity::Info, 'custom', [], Confidence::Low),
+                new Issue('SOME_FUTURE_RULE', 'm', 'x.php', 3, Severity::Warning, 'custom', [], Confidence::Medium),
+            ], null, ''),
+        ];
+        $cats = [];
+        foreach (QualityScore::riskOverview($results) as $row) {
+            $cats[$row['category']] = $row['findings'];
+        }
+        self::assertSame(1, $cats['Security'] ?? 0);
+        self::assertSame(1, $cats['Maintainability'] ?? 0);
+        self::assertSame(1, $cats['General'] ?? 0);
+        self::assertArrayNotHasKey('Laravel Best Practices', $cats);
     }
 
     public function testRestructuredSectionsExist(): void
