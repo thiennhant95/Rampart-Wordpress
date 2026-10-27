@@ -1,8 +1,14 @@
 # Rampart WP Checker
 
+[![GitHub release](https://img.shields.io/github/v/release/VietVang-JSC/-rampart-wp-checker)](https://github.com/VietVang-JSC/-rampart-wp-checker/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PHP ^8.1](https://img.shields.io/badge/PHP-%5E8.1-777BB4.svg)](composer.json)
+
 One-command quality gate for WordPress plugins and themes. Static analysis,
 zero WordPress runtime needed — point it at a plugin folder and get a
 security report in seconds.
+
+![HTML report: How-to-read, Fix now, severity filters](docs/assets/shot-report.png)
 
 Free and MIT licensed. No account, no telemetry, no code leaves your machine.
 
