@@ -49,8 +49,9 @@ final class WpReporterModesTest extends TestCase
     /**
      * @param array<string, mixed> $config
      * @param list<array<string, mixed>>|null $rawIssues
+     * @param array<string, mixed> $metadata
      */
-    private function renderHtml(array $config = [], ?array $rawIssues = null): string
+    private function renderHtml(array $config = [], ?array $rawIssues = null, array $metadata = [], string $filename = 'quality-report.html'): string
     {
         $this->tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'qc-wprep-' . uniqid('', true);
         @mkdir($this->tmp, 0777, true);
@@ -71,9 +72,11 @@ final class WpReporterModesTest extends TestCase
                 ),
                 $rawIssues
             ), null, '')];
+        $ctx->metadata = $metadata;
+
         (new HtmlReporter())->render($results, $ctx);
 
-        return (string) file_get_contents($this->tmp . DIRECTORY_SEPARATOR . 'quality-report.html');
+        return (string) file_get_contents($this->tmp . DIRECTORY_SEPARATOR . $filename);
     }
 
     public function testWordpressBranding(): void
@@ -181,6 +184,61 @@ final class WpReporterModesTest extends TestCase
 
         self::assertStringNotContainsString('class="fixbox"', $html);
         self::assertStringContainsString('Findings-only mode', $html);
+        self::assertFileExists($this->tmp . DIRECTORY_SEPARATOR . 'quality-report-findings.html');
+    }
+
+    public function testClientReportTrimsEngineeringSections(): void
+    {
+        $html = $this->renderHtml(
+            ['report_client' => true, 'remediation' => false],
+            null,
+            [],
+            'quality-report-client.html'
+        );
+
+        self::assertStringContainsString('WordPress Quality Report', $html);
+        self::assertStringContainsString('RAMPART', $html);
+        self::assertStringContainsString('Project:', $html);
+        self::assertStringNotContainsString('Package:', $html);
+        self::assertStringNotContainsString('class="fixbox"', $html);
+        self::assertStringNotContainsString('id="checkers"', $html);
+        self::assertStringNotContainsString('id="risk-overview"', $html);
+        self::assertStringNotContainsString('id="delta"', $html);
+        self::assertStringNotContainsString('id="top-rules"', $html);
+        self::assertStringNotContainsString('id="appendix"', $html);
+        self::assertStringContainsString('id="quality-score"', $html);
+        self::assertStringContainsString('id="action-plan"', $html);
+    }
+
+    public function testClientBrandingIsConfigurable(): void
+    {
+        $html = $this->renderHtml(
+            [
+                'report_client' => true,
+                'remediation' => false,
+                'html' => ['client_brand' => 'Acme WP', 'client_project' => 'Plugin X'],
+            ],
+            null,
+            [],
+            'quality-report-client.html'
+        );
+
+        self::assertStringContainsString('Acme WP', $html);
+        self::assertStringContainsString('Project: Plugin X', $html);
+        self::assertStringNotContainsString('RAMPART', $html);
+    }
+
+    public function testAllVariantsWritesThreeReports(): void
+    {
+        $dev = $this->renderHtml([], null, ['html_all_variants' => true]);
+
+        $findings = (string) file_get_contents($this->tmp . DIRECTORY_SEPARATOR . 'quality-report-findings.html');
+        $client = (string) file_get_contents($this->tmp . DIRECTORY_SEPARATOR . 'quality-report-client.html');
+        self::assertStringContainsString('class="fixbox"', $dev);
+        self::assertStringNotContainsString('class="fixbox"', $findings);
+        self::assertStringContainsString('id="checkers"', $findings);
+        self::assertStringNotContainsString('id="checkers"', $client);
+        self::assertStringContainsString('WordPress Quality Report', $client);
     }
 
     public function testConsoleRespectsMode(): void

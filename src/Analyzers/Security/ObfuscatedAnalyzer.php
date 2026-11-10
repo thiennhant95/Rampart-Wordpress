@@ -11,7 +11,6 @@ use Rampart\QualityChecker\Result\Severity;
 
 final class ObfuscatedAnalyzer extends AbstractAnalyzer
 {
-
     private const RULE = 'OBFUSCATED_PHP';
 
     private const PATTERNS = [

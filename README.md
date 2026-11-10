@@ -113,6 +113,23 @@ php bin/wp-check /path/to/plugin --fail-on=none --format=html
 
 Machine reports (JSON/SARIF) always carry full data either way.
 
+Three HTML audiences:
+
+```bash
+php bin/wp-check /path/to/plugin --format=html                    # full dev report
+php bin/wp-check /path/to/plugin --format=html --no-remediation   # dev, no fix guidance
+php bin/wp-check /path/to/plugin --format=html --client           # client report
+php bin/wp-check /path/to/plugin --format=html --all-variants     # all three files
+```
+
+`--all-variants` writes `quality-report.html`, `quality-report-findings.html`
+and `quality-report-client.html` side by side. A single `--no-remediation` run
+writes both the legacy `quality-report.html` and `quality-report-findings.html`.
+The client report keeps Summary, How to read, Fix now, Quality Score, Action
+Plan, findings and OWASP (when present), and drops Risk Overview, Delta, Top
+Rules, Per-Checker and Appendix. Branding: `html.client_brand` and
+`html.client_project` in `config/wp-checker.php`.
+
 CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 
 ## Options (short)
@@ -124,6 +141,8 @@ CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 | `--fail-on=none` | Review without failing (exit 0). |
 | `--exclude-path='*/vendor/*'` | Skip paths (repeatable). `vendor`/`node_modules`/`fixtures` already excluded. |
 | `--format=json,html,sarif,md,console,all` | Report formats. SARIF feeds GitHub code scanning. |
+| `--client` | Client-facing HTML: findings only, trimmed chrome, relative paths; writes `quality-report-client.html`. |
+| `--all-variants` | With HTML: write dev + findings-only + client reports in one run. |
 | `--version` | Print tool version. |
 
 Exit codes: `0` clean/review · `1` gate failed · `2` bad invocation · `3` internal error.
