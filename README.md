@@ -88,7 +88,7 @@ JS/CSS syntax, …) behave like the parent Laravel tool.
 ## Recipes
 
 ```bash
-# Calm report for clients: errors and criticals only
+# Quieter review report: errors and criticals only
 php wp-check.phar /path/to/plugin --min-severity=error --fail-on=none --format=html
 
 # Hide a noisy rule for now (temporary)
@@ -100,35 +100,20 @@ php bin/wp-check /path/to/plugin --baseline-generate --fail-on=none
 php bin/wp-check /path/to/plugin --baseline-file=baseline.json
 ```
 
-Two report modes: findings-only (where the problems are) vs findings plus
-how-to-fix guidance (default). Clients get the first, developers the second:
+Fix guidance is on by default. The same scan can produce three HTML files;
+the flags below change presentation only, not findings or the gate.
 
-```bash
-# Findings only — no fix boxes, no remediation section
-php bin/wp-check /path/to/plugin --no-remediation --fail-on=none --format=html
+| If the reader will ... | Add this flag | Open or send this file |
+|---|---|---|
+| Fix the issues | None; this is the default | `quality-report.html` |
+| Review the same technical report without fix boxes | `--no-remediation` | `quality-report-findings.html` |
+| Read a simplified external summary | `--client` | `quality-report-client.html` |
+| Compare or archive every presentation | `--all-variants` | All three files |
 
-# Findings + fix (default) — or set remediation: false in config/wp-checker.php
-php bin/wp-check /path/to/plugin --fail-on=none --format=html
-```
+Details: [`docs/reports.md`](docs/reports.md). External handoffs:
+[`docs/client-reports.md`](docs/client-reports.md).
 
 Machine reports (JSON/SARIF) always carry full data either way.
-
-Three HTML audiences:
-
-```bash
-php bin/wp-check /path/to/plugin --format=html                    # full dev report
-php bin/wp-check /path/to/plugin --format=html --no-remediation   # dev, no fix guidance
-php bin/wp-check /path/to/plugin --format=html --client           # client report
-php bin/wp-check /path/to/plugin --format=html --all-variants     # all three files
-```
-
-`--all-variants` writes `quality-report.html`, `quality-report-findings.html`
-and `quality-report-client.html` side by side. A single `--no-remediation` run
-writes both the legacy `quality-report.html` and `quality-report-findings.html`.
-The client report keeps Summary, How to read, Fix now, Quality Score, Action
-Plan, findings and OWASP (when present), and drops Risk Overview, Delta, Top
-Rules, Per-Checker and Appendix. Branding: `html.client_brand` and
-`html.client_project` in `config/wp-checker.php`.
 
 CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 
@@ -141,8 +126,9 @@ CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 | `--fail-on=none` | Review without failing (exit 0). |
 | `--exclude-path='*/vendor/*'` | Skip paths (repeatable). `vendor`/`node_modules`/`fixtures` already excluded. |
 | `--format=json,html,sarif,md,console,all` | Report formats. SARIF feeds GitHub code scanning. |
-| `--client` | Client-facing HTML: findings only, trimmed chrome, relative paths; writes `quality-report-client.html`. |
-| `--all-variants` | With HTML: write dev + findings-only + client reports in one run. |
+| `--no-remediation` | Hide fix guidance in console, HTML, and Markdown reports. Findings, scores, and JSON/SARIF are unchanged. |
+| `--client` | Simplified external HTML report. Writes only `quality-report-client.html`, with relative paths and no editor links. |
+| `--all-variants` | With HTML, write the full, findings-only, and client presentations in one run. |
 | `--version` | Print tool version. |
 
 Exit codes: `0` clean/review · `1` gate failed · `2` bad invocation · `3` internal error.
