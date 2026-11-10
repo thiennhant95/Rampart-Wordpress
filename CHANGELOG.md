@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-03
+
+### Added
+
+- `--client`: client-facing HTML (findings only, trimmed chrome, relative
+  paths, no editor deep links); writes `quality-report-client.html`.
+- `--all-variants`: write dev, findings-only and client HTML in one run.
+- Client branding config: `html.client_brand` and `html.client_project`.
+
+### Changed
+
+- Client report keeps Summary, How to read, Fix now, Quality Score, Action
+  Plan, findings and OWASP (when present); drops Risk Overview, Delta, Top
+  Rules, Per-Checker and Appendix.
+- `--no-remediation` now also writes `quality-report-findings.html` alongside
+  the legacy `quality-report.html`.
+- Ported the parent's readable-report fixes (clean UTF-8 output, no Laravel
+  leftovers) and fixed one pre-existing PSR-12 blank line.
+
+### Tests
+
+- `118` tests; PHPStan `[OK]`, PHPCS error-free (one pre-existing warning in
+  `tools/build-phar.php`).
+
 ## [0.3.0] - 2026-10-27
 
 ### Added
