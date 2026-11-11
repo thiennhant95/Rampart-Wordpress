@@ -32,7 +32,7 @@ php -d memory_limit=2G wp-check.phar /path --exclude-path='*/build/*'
 ## FAQ
 
 **Does it modify my code?** No. Read-only scans; reports go to the output dir
-(or `--output`). No auto-fix in v0.1 (phpcbf passthrough exists upstream).
+(or `--output`). No auto-fix yet (phpcbf passthrough exists upstream).
 
 **Does it phone home?** No. No account, no telemetry, no network calls. The
 only network in the whole workflow is you downloading the phar.

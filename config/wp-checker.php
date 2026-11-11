@@ -126,7 +126,7 @@ return [
             'test_without_assert' => false,
         ],
 
-        // WordPress-specific checks — the v0.1 WP analyzer set (SPEC.md §5).
+        // WordPress-specific checks (SPEC.md §5).
         'wordpress' => [
             'wpdb_prepare' => true,
             'unescaped_output' => true,

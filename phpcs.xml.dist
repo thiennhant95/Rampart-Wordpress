@@ -10,6 +10,12 @@
         <severity>0</severity>
     </rule>
 
+    <!-- tools/build-phar.php is a CLI entry script: small local helpers plus
+         the executable build steps are intentional, not a library design flaw. -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>*/tools/build-phar.php</exclude-pattern>
+    </rule>
+
     <arg name="extensions" value="php"/>
     <exclude-pattern>*/vendor/*</exclude-pattern>
 </ruleset>

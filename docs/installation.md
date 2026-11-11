@@ -3,7 +3,7 @@
 ## Requirements
 
 - **PHP 8.1+** to *run* the tool (`php -v` to check). Ubuntu/Debian:
-  `sudo apt install php-cli`; Windows: use the installer from windows.php.net
+  `sudo apt install php-cli`; Windows: download from https://www.php.net/downloads
   (add PHP to PATH); macOS: `brew install php`.
 - The tool **scans** any PHP version — WordPress 6.x plugins written for
   PHP 7.x are fine.
@@ -19,14 +19,14 @@
      $e = (Get-Content wp-check.phar.sha256).Split()[0].ToUpper()
      if ($h -ne $e) { throw 'checksum mismatch' } else { 'checksum OK' }
      ```
-3. Run: `php wp-check.phar --version` → e.g. `rampart wp-check v0.1.0`.
+3. Run: `php wp-check.phar --version` → e.g. `rampart wp-check v0.4.0`.
    If you see a version, you are done.
 
 ## Option B — Composer via GitHub (verified working)
 
 ```bash
 composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
-composer require --dev rampart/wp-quality-checker:^0.3
+composer require --dev rampart/wp-quality-checker:^0.4
 php vendor/bin/wp-check /path/to/plugin
 ```
 
@@ -41,7 +41,7 @@ Until the Packagist submit lands, use A, B or D.
 ## Option D — From source
 
 ```bash
-git clone <repo> rampart-wp-checker && cd rampart-wp-checker
+git clone https://github.com/VietVang-JSC/rampart-wp-checker && cd rampart-wp-checker
 composer install --no-interaction
 php bin/wp-check /path/to/plugin
 ```

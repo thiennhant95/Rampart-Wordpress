@@ -11,7 +11,7 @@ use PhpParser\Node;
  *
  * WordPress wires behavior with string callbacks — add_action('hook', 'func'),
  * add_menu_page(..., 'callback') — so analyzers must map hook registrations to
- * the function bodies that run. Supported callback shapes (v0.1):
+ * the function bodies that run. Supported callback shapes:
  *   - 'function_name' (plain function)
  *   - 'Class::method' (static)
  * Closures and [$obj, 'method'] arrays are not resolved (documented boundary:

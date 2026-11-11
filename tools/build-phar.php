@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Build the single-file wp-check.phar (no Composer needed to RUN it).
  *
  *   php -d phar.readonly=0 tools/build-phar.php [--output=build/wp-check.phar]
- *     [--version=v0.1.0] [--root=.]
+  *     [--version=v0.4.0] [--root=.]
  *
  * Steps: stage src+config+bin+composer.json → `composer install --no-dev`
  * (runtime deps only: php-parser, symfony) → stamp VERSION → pack with the

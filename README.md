@@ -29,7 +29,7 @@ php wp-check.phar --version
 
 ```bash
 composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
-composer require --dev rampart/wp-quality-checker:^0.3
+composer require --dev rampart/wp-quality-checker:^0.4
 php vendor/bin/wp-check /path/to/plugin
 ```
 
@@ -68,7 +68,7 @@ guidance — or a clean bill. The headline count mixes severities; see
 A first scan with "50 findings" where 45 are warnings is normal — it is not
 50 vulnerabilities.
 
-## WordPress rules (v0.1)
+## WordPress rules
 
 | Rule | Severity | Default | Fires when |
 |---|---|---|---|
@@ -133,9 +133,9 @@ CI setups (GitHub Actions, GitLab): [`docs/ci.md`](docs/ci.md).
 
 Exit codes: `0` clean/review · `1` gate failed · `2` bad invocation · `3` internal error.
 
-## Honest limits (v0.1)
+## Honest limits
 
-- Heuristics, not proof. No precision claims yet — the 100-case corpus lands in v0.2.
+- Heuristics, not proof. No precision claims yet — a labeled corpus is still planned.
 - `call_user_func($dynamic)` flags behind `is_callable` guards; `include` with `basename()` still flags; unknown function params are clean.
 - Standalone only. Scans code, never boots WordPress.
 

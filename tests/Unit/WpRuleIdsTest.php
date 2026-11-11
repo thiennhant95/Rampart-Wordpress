@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Rampart\QualityChecker\Result\RuleIds;
 
 /**
- * The v0.1 WordPress rule registry: every WP_* id the analyzers can emit
+ * The WordPress rule registry: every WP_* id the analyzers can emit
  * must be registered (reporters and remediation agree on this class).
  */
 final class WpRuleIdsTest extends TestCase

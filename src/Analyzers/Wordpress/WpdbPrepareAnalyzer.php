@@ -25,7 +25,7 @@ use Rampart\QualityChecker\Result\Severity;
  * clean. `$wpdb->prepare()` with no placeholders is still clean here (it is
  * at worst useless, not injectable) — a separate convention rule may flag it.
  * Function parameters with no same-file tainted origin are treated as clean
- * (may miss; cross-function taint arrives with the taint engine in v0.2).
+ * (may miss; cross-function taint arrives with a future taint engine).
  */
 final class WpdbPrepareAnalyzer extends AbstractAnalyzer
 {

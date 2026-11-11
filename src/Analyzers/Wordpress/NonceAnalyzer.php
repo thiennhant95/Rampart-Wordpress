@@ -13,7 +13,7 @@ use Rampart\QualityChecker\Result\Severity;
 /**
  * WP_NONCE — state-changing handlers without nonce verification.
  *
- * Scope (v0.1, precise): functions registered via `add_action('admin_post_*')`
+ * Scope (precise): functions registered via `add_action('admin_post_*')`
  * or `add_action('wp_ajax_*')` (excluding `wp_ajax_nopriv_*`) whose body never
  * calls `wp_verify_nonce`, `check_admin_referer`, `check_ajax_referer` or
  * `wp_nonce_ays`. Only string callbacks (`'func'`, `'Class::method'`) are
