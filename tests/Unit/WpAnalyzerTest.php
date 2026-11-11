@@ -15,7 +15,7 @@ use Rampart\QualityChecker\Analyzers\Wordpress\UnescapedOutputAnalyzer;
 use Rampart\QualityChecker\Analyzers\Wordpress\WpdbPrepareAnalyzer;
 
 /**
- * WordPress analyzers, v0.1 set. Each rule pins 5 true positives and
+ * WordPress analyzers. Each rule pins 5 true positives and
  * 5 true negatives as temp files (SPEC.md §5/§7: no rule ships without them).
  */
 final class WpAnalyzerTest extends TestCase

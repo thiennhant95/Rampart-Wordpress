@@ -76,7 +76,7 @@ final class RuleIds
     public const ROGUE_PHP = 'ROGUE_PHP';
     public const OBFUSCATED_PHP = 'OBFUSCATED_PHP';
 
-    // --- WordPress analyzers (v0.1 set, SPEC.md §5) --------------------------
+    // --- WordPress analyzers (SPEC.md §5) --------------------------
     public const WPDB_PREPARE = 'WPDB_PREPARE';
     public const WP_UNESCAPED_OUTPUT = 'WP_UNESCAPED_OUTPUT';
     public const WP_NONCE = 'WP_NONCE';

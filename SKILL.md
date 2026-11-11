@@ -47,4 +47,4 @@ php bin/wp-check /path --baseline-file=baseline.json
 ## Notes
 - Requires PHP 8.1+ to run; scans any PHP version (incl. 5.x-era plugins).
 - `vendor/`/`node_modules/` excluded by default.
-- Heuristics, no precision claims in v0.1 — verify criticals by reading code.
+- Heuristics, no precision claims — verify criticals by reading code.

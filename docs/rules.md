@@ -23,7 +23,7 @@ $rows = $wpdb->query("OPTIMIZE TABLE {$wpdb->posts}");
 ```
 
 Unknown function parameters are treated as clean (cross-function taint
-arrives in v0.2). `$wpdb->prepare()` without placeholders is useless but not
+arrives with a future taint engine). `$wpdb->prepare()` without placeholders is useless but not
 injectable — not flagged here.
 
 ## WP_UNESCAPED_OUTPUT [warning]

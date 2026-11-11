@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Stale version labels in user-facing docs and comments (`v0.1`/`v0.2`
+  section tags, `v0.1.0`/`v0.2` promises): headings, install/version
+  examples (now `v0.4.0`), Composer constraint (`^0.3` → `^0.4`), and
+  timeless wording for the planned labeled corpus and taint engine.
+- Install docs: dead `windows.php.net` reference → `php.net/downloads`,
+  real repo URL in the source-clone recipe.
+- PHPCS: documented CLI-entry-script exclusion for the
+  `PSR1.Files.SideEffects` sniff on `tools/build-phar.php`; lint is now
+  warning-free (exit 0).
+
 ## [0.4.0] - 2026-11-03
 
 ### Added
