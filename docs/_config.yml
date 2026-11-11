@@ -1,0 +1,8 @@
+title: Rampart WP Checker
+description: WordPress quality gate — WPCS, phpstan, phpunit, WP security heuristics.
+theme: jekyll-theme-minimal
+baseurl: "/Rampart-Wordpress"
+url: "https://thiennhant95.github.io"
+markdown: kramdown
+show_downloads: false
+lang: en

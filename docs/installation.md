@@ -25,7 +25,7 @@
 ## Option B — Composer via GitHub (verified working)
 
 ```bash
-composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
+composer config repositories.wp-checker vcs https://github.com/thiennhant95/Rampart-Wordpress
 composer require --dev rampart/wp-quality-checker:^0.4
 php vendor/bin/wp-check /path/to/plugin
 ```
@@ -41,7 +41,7 @@ Until the Packagist submit lands, use A, B or D.
 ## Option D — From source
 
 ```bash
-git clone https://github.com/VietVang-JSC/rampart-wp-checker && cd rampart-wp-checker
+git clone https://github.com/thiennhant95/Rampart-Wordpress && cd Rampart-Wordpress
 composer install --no-interaction
 php bin/wp-check /path/to/plugin
 ```

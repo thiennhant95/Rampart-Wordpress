@@ -1,6 +1,6 @@
 # Rampart WP Checker
 
-[![GitHub release](https://img.shields.io/github/v/release/VietVang-JSC/rampart-wp-checker)](https://github.com/VietVang-JSC/rampart-wp-checker/releases)
+[![Docs](https://img.shields.io/badge/docs-EN%20%7C%20JA%20%7C%20VI-blue)](https://thiennhant95.github.io/Rampart-Wordpress/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PHP ^8.1](https://img.shields.io/badge/PHP-%5E8.1-777BB4.svg)](composer.json)
 
@@ -11,6 +11,18 @@ security report in seconds.
 ![HTML report: How-to-read, Fix now, severity filters](docs/assets/shot-report.png)
 
 Free and MIT licensed. No account, no telemetry, no code leaves your machine.
+
+## Rampart family
+
+| Project | Focus | Repository | Documentation |
+|---|---|---|---|
+| **Rampart** | Laravel Artisan quality gate | [thiennhant95/Rampart](https://github.com/thiennhant95/Rampart) | [Pages](https://thiennhant95.github.io/Rampart/) |
+| **Rampart PHP** | Plain PHP + frameworks, PHP 7.4+ | [thiennhant95/Rampart-PHP](https://github.com/thiennhant95/Rampart-PHP) | [Pages](https://thiennhant95.github.io/Rampart-PHP/) |
+| **Rampart WP** | WordPress plugins/themes | [thiennhant95/Rampart-Wordpress](https://github.com/thiennhant95/Rampart-Wordpress) | [Pages](https://thiennhant95.github.io/Rampart-Wordpress/) |
+
+Full documentation: **[English](https://thiennhant95.github.io/Rampart-Wordpress/en/)** ·
+**[日本語](https://thiennhant95.github.io/Rampart-Wordpress/ja/)** ·
+**[Tiếng Việt](https://thiennhant95.github.io/Rampart-Wordpress/vi/)**
 
 ## Install (pick one)
 
@@ -28,7 +40,7 @@ php wp-check.phar --version
 **2. Composer via GitHub** (until the Packagist submit lands):
 
 ```bash
-composer config repositories.wp-checker vcs https://github.com/VietVang-JSC/rampart-wp-checker
+composer config repositories.wp-checker vcs https://github.com/thiennhant95/Rampart-Wordpress
 composer require --dev rampart/wp-quality-checker:^0.4
 php vendor/bin/wp-check /path/to/plugin
 ```
@@ -38,7 +50,7 @@ php vendor/bin/wp-check /path/to/plugin
 **4. From source:**
 
 ```bash
-git clone https://github.com/VietVang-JSC/rampart-wp-checker && cd rampart-wp-checker
+git clone https://github.com/thiennhant95/Rampart-Wordpress && cd Rampart-Wordpress
 composer install --no-interaction
 php bin/wp-check /path/to/plugin
 ```
