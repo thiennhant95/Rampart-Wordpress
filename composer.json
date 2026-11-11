@@ -4,6 +4,12 @@
     "keywords": ["wordpress", "quality", "phpcs", "phpstan", "security", "static-analysis", "ci"],
     "license": "MIT",
     "type": "library",
+    "homepage": "https://github.com/thiennhant95/Rampart-Wordpress",
+    "support": {
+        "issues": "https://github.com/thiennhant95/Rampart-Wordpress/issues",
+        "source": "https://github.com/thiennhant95/Rampart-Wordpress",
+        "docs": "https://thiennhant95.github.io/Rampart-Wordpress/"
+    },
     "bin": [
         "bin/wp-check"
     ],
