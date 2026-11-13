@@ -1,10 +1,13 @@
----
+﻿---
 layout: default
 title: Rampart WP Checker — English
 description: Full English documentation for the WordPress quality gate.
 ---
 
 # Rampart WP Checker — English
+
+![wp-check security tier scan](../assets/rampart-wp.png)
+
 
 [English]({{ site.baseurl }}/en/) · [日本語]({{ site.baseurl }}/ja/) · [Tiếng Việt]({{ site.baseurl }}/vi/)
 

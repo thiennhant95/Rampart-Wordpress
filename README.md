@@ -10,6 +10,8 @@ security report in seconds.
 
 ![HTML report: How-to-read, Fix now, severity filters](docs/assets/shot-report.png)
 
+![wp-check security tier: WP_ABSPATH and EOL_COMPONENT findings with remediation](docs/assets/rampart-wp.png)
+
 Free and MIT licensed. No account, no telemetry, no code leaves your machine.
 
 ## Rampart family

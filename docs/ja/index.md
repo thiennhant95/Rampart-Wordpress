@@ -1,10 +1,13 @@
----
+﻿---
 layout: default
 title: Rampart WP Checker — 日本語
 description: WordPress 向け品質ゲートの日本語ドキュメント。
 ---
 
 # Rampart WP Checker — 日本語
+
+![wp-check security tier scan](../assets/rampart-wp.png)
+
 
 [English]({{ site.baseurl }}/en/) · [日本語]({{ site.baseurl }}/ja/) · [Tiếng Việt]({{ site.baseurl }}/vi/)
 

@@ -1,10 +1,13 @@
----
+﻿---
 layout: default
 title: Rampart WP Checker — Tiếng Việt
 description: Tài liệu tiếng Việt cho quality gate WordPress.
 ---
 
 # Rampart WP Checker — Tiếng Việt
+
+![wp-check security tier scan](../assets/rampart-wp.png)
+
 
 [English]({{ site.baseurl }}/en/) · [日本語]({{ site.baseurl }}/ja/) · [Tiếng Việt]({{ site.baseurl }}/vi/)
 
