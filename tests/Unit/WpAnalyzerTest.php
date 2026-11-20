@@ -489,6 +489,14 @@ final class WpAnalyzerTest extends TestCase
         self::assertSame([], $this->rules(new AbspathAnalyzer(), $f));
     }
 
+    public function testAbspathSilentOnItsOwnSource(): void
+    {
+        // The detector's docblock/needle contain "Plugin Name:"; scanning itself
+        // must not report the detector as an unguarded plugin entry file.
+        $source = (string) (new \ReflectionClass(AbspathAnalyzer::class))->getFileName();
+        self::assertSame([], $this->rules(new AbspathAnalyzer(), $source));
+    }
+
     // --- WP_TABLE_PREFIX: 5 TP ---
 
     public function testPrefixFlagsSelect(): void

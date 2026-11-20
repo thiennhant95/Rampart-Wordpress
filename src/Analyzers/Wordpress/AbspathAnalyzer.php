@@ -30,8 +30,15 @@ final class AbspathAnalyzer extends AbstractAnalyzer
     public function analyze(array $files): array
     {
         $issues = [];
+        $self = realpath(__FILE__);
         foreach ($files as $file) {
             if (!$this->supports($file)) {
+                continue;
+            }
+            // Self-scan: this analyzer's docblock and header needle contain the
+            // literal "Plugin Name:" token, so a raw text search would flag its
+            // own source. The detector is not a plugin entry point.
+            if ($self !== false && realpath($file) === $self) {
                 continue;
             }
             $code = $this->sharedSource($file);
