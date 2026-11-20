@@ -94,6 +94,11 @@ A first scan with "50 findings" where 45 are warnings is normal — it is not
 | `WP_ABSPATH` | warning | on | plugin entry file without `defined('ABSPATH')` guard |
 | `WP_TABLE_PREFIX` | info | off | literal `wp_` table in SQL strings |
 | `WP_TEXTDOMAIN` | info | off | translation call without literal domain |
+| `PERMS_TOO_OPEN` | critical/warning | on | `.env`/`wp-config.php`/uploads world-writable (critical) or group-writable (warning), compared by bits |
+| `EOL_COMPONENT` | warning | on | `php` constraint EOL (including lines older than the tracked table, reported generically) |
+| `MISSING_COMPOSER` | warning | on | Composer-managed plugin/theme (`vendor/`, lock, or console bin) without `composer.json` |
+| `INVALID_CONSTRAINT` | error | on | `composer.json` unparseable or a `php`/`laravel/framework` constraint is not a version string |
+| `ROGUE_PHP` | critical/warning | on | executable PHP under `wp-content/uploads` (critical when obfuscation/code-exec payload matches, warning otherwise) |
 
 Each rule with true/false examples: [`docs/rules.md`](docs/rules.md).
 Generic inherited rules (SQLi, XSS, command injection, SSRF, secrets, eval,

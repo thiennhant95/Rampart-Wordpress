@@ -140,3 +140,53 @@ $s = __('Save', 'my-plugin');
 ```
 
 Enable: `'textdomain' => true` under `analyzers.wordpress`.
+
+## Deploy & forensics (inherited)
+
+### PERMS_TOO_OPEN [critical/warning]
+
+Compared by write bits, not a hardcoded octal list:
+
+- `o+w` (world-writable: 777, 767, 757, ...) -> **critical**.
+- `g+w` only (775, ...) -> **warning** (depends on deploy context).
+- 644/755 (and `.env` at 644, the common default) -> silent.
+
+Checked at the scan root: `.env`, `wp-config.php`, `web/wp-config.php`,
+`wp-content/uploads`, `web/wp-content/uploads`. Secrets get a `600`/`640`
+fix hint; directories get `755`.
+
+### EOL_COMPONENT [warning]
+
+Reads `composer.json` `require.php` (and `laravel/framework`, irrelevant on a
+plain WordPress install). Only fires when every mentioned line is EOL:
+`>=8.1` and any supported line stay silent. Lines older than the tracked
+table (PHP 7.x) are reported with a generic "older than 8.0" message.
+
+### MISSING_COMPOSER [warning] / INVALID_CONSTRAINT [error]
+
+`MISSING_COMPOSER` only fires when Composer evidence exists (`vendor/`,
+`composer.lock`, or `bin/console`); WordPress core never reports. An
+existing `composer.json` that is not valid JSON, or a `php` constraint that
+is not a version string, is `INVALID_CONSTRAINT`.
+
+### ROGUE_PHP [critical/warning]
+
+Scans `wp-content/uploads` (plus Bedrock-style `web/wp-content/uploads` and
+`public/wp-content/uploads`). Any PHP file other than the hardening
+`index.php` is a finding. Content matching `OBFUSCATED_PHP` evidence or a
+code-execution sink (`eval`, `system`, `shell_exec`, ...) is **critical**;
+an otherwise benign stray file stays a **warning**.
+
+```php
+// FLAGS (critical) — in wp-content/uploads/2026/01/x.php
+<?php eval(base64_decode('...'));
+
+// FLAGS (warning) — misplaced but harmless
+<?php echo 'hello';
+
+// SILENT
+wp-content/uploads/index.php   // hardening stub
+
+// SILENT
+wp-content/uploads/photo.jpg
+```

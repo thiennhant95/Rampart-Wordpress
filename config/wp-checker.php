@@ -159,6 +159,7 @@ return [
         'ops' => [
             'perms' => true,
             'eol' => true,
+            'composer' => true,
         ],
 
         // Additional protective middleware name fragments for access control.

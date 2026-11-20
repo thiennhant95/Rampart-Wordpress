@@ -552,29 +552,49 @@ final class RuleRemediation
                 'docs' => null,
             ],
             'PERMS_TOO_OPEN' => [
-                'why' => 'File or directory is world-writable (777/666) — deploy artifact leaks or is mutable by any local user.',
+                'why' => 'File or directory is writable by other/group — deploy artifact leaks or is mutable by any local user. World-write is Critical; group-write is a Warning.',
                 'fix' => <<<'CODE'
-                    chmod 755 app/ storage/ bootstrap/cache/
-                    chmod 644 app/**/*.php
-                    # .gitignore vendor/ and never deploy with 777
+                    chmod 600 wp-config.php  # 640 if the web server needs group read
+                    chmod 755 wp-content/uploads
+                    chmod 644 wp-config.php.bak 2>/dev/null
+                    # never leave uploads or wp-config world-writable
                     CODE,
                 'docs' => null,
             ],
             'EOL_COMPONENT' => [
-                'why' => 'Framework or PHP version is end-of-life — no security patches.',
+                'why' => 'PHP (or framework) version is end-of-life — no security patches. Versions older than the tracked table are reported with a generic message.',
                 'fix' => <<<'CODE'
-                    # Check https://endoflife.date/laravel and https://endoflife.date/php
-                    composer update illuminate/* --with-dependencies
-                    # upgrade to supported Laravel/PHP (e.g. Laravel 12, PHP 8.3)
+                    # Check https://endoflife.date/php
+                    # upgrade to a supported PHP line (e.g. 8.3+) and re-run:
+                    composer update --with-dependencies
+                    CODE,
+                'docs' => null,
+            ],
+            'MISSING_COMPOSER' => [
+                'why' => 'A Composer-managed plugin/theme has no composer.json — dependencies are not reproducible or auditable.',
+                'fix' => <<<'CODE'
+                    # Restore the manifest from version control, then:
+                    composer validate
+                    composer install --no-dev --optimize-autoloader
+                    CODE,
+                'docs' => null,
+            ],
+            'INVALID_CONSTRAINT' => [
+                'why' => 'composer.json is unparseable or a version constraint is not a string — pins cannot be checked.',
+                'fix' => <<<'CODE'
+                    composer validate
+                    # Fix JSON syntax and require entries, e.g. "php": "^8.3"
+                    composer update --lock
                     CODE,
                 'docs' => null,
             ],
             'ROGUE_PHP' => [
-                'why' => 'Unexpected PHP file in public/ or upload dir — possible webshell or dropper.',
+                'why' => 'Executable PHP under wp-content/uploads — almost always a webshell or dropper. Files matching obfuscation/code-exec payloads are Critical; otherwise the finding stays a Warning.',
                 'fix' => <<<'CODE'
                     # Remove it, audit git history, and re-deploy from clean artifact:
-                    git log --all -- public/
-                    rm public/*.php  # only index.php should be there
+                    git log --all -- wp-content/uploads/
+                    find wp-content/uploads -name '*.php' -delete
+                    # keep only the hardening index.php if your setup uses one
                     CODE,
                 'docs' => null,
             ],
