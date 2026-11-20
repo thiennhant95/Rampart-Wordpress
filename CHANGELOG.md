@@ -7,8 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-20
+
+### Added
+
+- `MISSING_COMPOSER` and `INVALID_CONSTRAINT`: a Composer-managed
+  plugin/theme (`vendor/`, lock file, or console binary) with no
+  `composer.json`, or a manifest that is unparseable / carries a non-string
+  `php` or `laravel/framework` constraint.
+- Shared `PhpPayloadPatterns` detector backing `OBFUSCATED_PHP` and the
+  rogue-upload grading, preserving the WordPress hex tuning (whitespace
+  escapes and regex character classes stay silent; floor of 6).
+
+### Changed
+
+- `ROGUE_PHP` now targets `wp-content/uploads` (plus Bedrock-style
+  `web/wp-content/uploads` and `public/wp-content/uploads`) and grades by
+  content: obfuscation/code-execution evidence → Critical; a benign stray
+  file → Warning. The hardening `index.php` stays silent.
+- `PERMS_TOO_OPEN` compares permission bits instead of a hardcoded octal list
+  and checks `.env`, `wp-config.php` (including `web/`) and the uploads
+  directory: other-write → Critical, group-write → Warning.
+- `EOL_COMPONENT` reports lines older than the tracked map with a generic
+  "older than X" message, and stays silent for open ranges (`>=`) and any
+  supported line.
+
 ### Fixed
 
+- Self-scan: `WP_ABSPATH` no longer flags `AbspathAnalyzer.php` itself (the
+  detector's docblock/needle contain the `Plugin Name:` token).
 - Console output no longer claims `✔ All checks passed.` when checkers reported findings within the `--fail-on` threshold — it now says so explicitly. `phpunit.xml.dist` no longer declares a missing `tests/Feature` suite.
 
 ## [0.4.1] - 2026-11-13
