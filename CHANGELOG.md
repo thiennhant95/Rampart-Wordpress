@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-25
+
+### Fixed
+
+- WordPress rules and the shared security/OWASP analyzers skip test paths by
+  default, so fixture plugins are not reported as production sinks.
+- `OWASP_SSRF` no longer flags paths rooted at `__DIR__`/`__FILE__`/`dirname()`.
+- `OWASP_PATH_TRAVERSAL` recognises WordPress path helpers
+  (`plugin_dir_path`, `get_template_directory`, `get_stylesheet_directory`,
+  `get_theme_root`, `content_url`, `includes_url`, `plugin_basename`).
+- `call_user_func` callables guarded by `is_callable()` or
+  `instanceof \Closure` in the same function are treated as internally
+  registered.
+
+### Added
+
+- CI workflow: PHP 8.1–8.4 matrix plus Windows, lint/phpstan/phpunit and a
+  self-scan job.
+
+### Changed
+
+- The standalone CLI raises the PHP memory floor to 512M for large plugins.
+- README now documents project status, supported versions and scope.
+
 ## [0.5.1] - 2026-11-25
 
 ### Fixed
