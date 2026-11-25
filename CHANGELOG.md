@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-25
+
+### Fixed
+
+- `UNSAFE_UNSERIALIZE` now matches function names case-insensitively, resolves
+  simple `$f = 'unserialize'; $f(...)` indirection, and follows
+  `call_user_func('unserialize', ...)` wrappers.
+- `UNSAFE_EVAL` resolves simple variable function names and flags
+  `call_user_func('assert', $code)` targets instead of skipping the literal
+  callable.
+- Malformed PHP no longer drops the whole file: the parser recovers the AST
+  around syntax errors, so valid sinks elsewhere in the file are still checked.
+- `OBFUSCATED_PHP` reports the matched source line, covers decode-family calls
+  (`base85_decode`, `str_rot*`, `*_decode`) and malformed `eval[...]`, while
+  preserving the WordPress hex-density tuning.
+- `WEAK_PASSWORD_POLICY` checks both ternary branches, resolves literal
+  concatenation/variables, and reports an unverifiable dynamic rule beside a
+  valid literal one instead of silently trusting it.
+
 ## [0.5.0] - 2026-11-20
 
 ### Added
