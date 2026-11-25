@@ -26,6 +26,17 @@ Full documentation: **[English](https://thiennhant95.github.io/Rampart-Wordpress
 **[日本語](https://thiennhant95.github.io/Rampart-Wordpress/ja/)** ·
 **[Tiếng Việt](https://thiennhant95.github.io/Rampart-Wordpress/vi/)**
 
+## Project status
+
+- **Beta (0.x)** — CI and the full test suite run on every push. Rule IDs and
+  report fields are stable in practice but may change in a minor release until
+  1.0; pin a tag in CI.
+- **Supported versions** — PHP `^8.1`; WordPress plugins/themes are parsed, not
+  executed.
+- **Scope** — static heuristics over the AST, not a full SAST replacement.
+  Expect false positives/negatives; see "Honest limits" below.
+- **Security** — report vulnerabilities privately via `SECURITY.md`.
+
 ## Install (pick one)
 
 **1. Phar — easiest, no Composer (recommended)**

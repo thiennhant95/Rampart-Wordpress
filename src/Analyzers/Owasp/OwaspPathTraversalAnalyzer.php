@@ -42,6 +42,10 @@ final class OwaspPathTraversalAnalyzer extends AbstractAnalyzer
     private const PATH_HELPERS = [
         'storage_path', 'base_path', 'public_path', 'resource_path',
         'database_path', 'app_path', 'config_path', 'lang_path', 'dirname',
+        // WordPress path helpers: the base directory is deploy-time; tainted
+        // arguments are still followed by the loop below.
+        'plugin_dir_path', 'get_template_directory', 'get_stylesheet_directory',
+        'get_theme_root', 'content_url', 'includes_url', 'plugin_basename',
     ];
 
     private const CONFIG_FUNCS = ['env', 'config'];

@@ -45,7 +45,7 @@ final class UnescapedOutputAnalyzer extends AbstractAnalyzer
     {
         $issues = [];
         foreach ($files as $file) {
-            if (!$this->supports($file)) {
+            if (!$this->supports($file) || $this->isTestPath($file)) {
                 continue;
             }
             $ast = $this->sharedAst($file);

@@ -32,7 +32,7 @@ final class AbspathAnalyzer extends AbstractAnalyzer
         $issues = [];
         $self = realpath(__FILE__);
         foreach ($files as $file) {
-            if (!$this->supports($file)) {
+            if (!$this->supports($file) || $this->isTestPath($file)) {
                 continue;
             }
             // Self-scan: this analyzer's docblock and header needle contain the

@@ -10,6 +10,7 @@ use Rampart\QualityChecker\Analyzers\Security\MassAssignmentAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\ObfuscatedAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\UnsafeDeserializationAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\UnsafeEvalAnalyzer;
+use Rampart\QualityChecker\Analyzers\Wordpress\AbspathAnalyzer;
 use Rampart\QualityChecker\Result\Issue;
 use Rampart\QualityChecker\Result\Severity;
 
@@ -141,6 +142,16 @@ final class SecurityHardeningTest extends TestCase
         ) {
             self::assertCount(1, (new ObfuscatedAnalyzer())->analyze([$file]));
         }
+    }
+
+    public function testWpRulesSkipTestFixtures(): void
+    {
+        $file = $this->file(
+            'tests/e2e/test-plugins/demo.php',
+            "<?php\n/* Plugin Name: Demo */\necho 'demo';\n"
+        );
+
+        self::assertCount(0, (new AbspathAnalyzer())->analyze([$file]));
     }
 
     public function testMassAssignmentKeepsValidSinkNextToSyntaxError(): void
