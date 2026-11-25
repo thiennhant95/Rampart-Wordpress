@@ -23,6 +23,8 @@ final class PhpPayloadPatterns
     private const OBFUSCATION = [
         '/eval\s*\(\s*base64_decode\s*\(/i' => 'eval(base64_decode(...))',
         '/gzinflate\s*\(\s*base64_decode\s*\(/i' => 'gzinflate(base64_decode(...))',
+        '/eval\s*\(\s*(?:str_rot\d+|base\d+_decode|[a-z_][a-z0-9_]*decode)\s*\(/i' => 'eval(decode(...))',
+        '/(?<![\$\w>:])eval\s*\[/i' => 'eval[...] (malformed dynamic execution)',
         '/str_rot13\s*\(/i' => 'str_rot13(...)',
         '/chr\s*\(\s*\d+\s*\)\s*\.\s*chr\s*\(/i' => 'chr() concatenation',
     ];
@@ -40,23 +42,38 @@ final class PhpPayloadPatterns
     private const DANGEROUS_CALL = '/\b(eval|assert|create_function|shell_exec|system|exec|passthru|popen|proc_open)\s*\(/i';
 
     /**
-     * First obfuscation signal in the source, with the regex that matched.
+     * First obfuscation signal in the source, with the regex that matched and
+     * the source line it starts on.
      *
-     * @return array{label: string, pattern: string}|null
+     * @return array{label: string, pattern: string, line: int}|null
      */
     public static function obfuscation(string $code): ?array
     {
         $stripped = self::stripStringsAndComments($code);
+        $lineSource = null;
         foreach (self::OBFUSCATION as $pattern => $label) {
-            if (preg_match($pattern, $stripped) === 1) {
-                return ['label' => $label, 'pattern' => $pattern];
+            if (preg_match($pattern, $stripped) !== 1) {
+                continue;
             }
+            if ($lineSource === null) {
+                $lineSource = self::stripStringsAndCommentsPreservingLines($code);
+            }
+            if (preg_match($pattern, $lineSource, $match, PREG_OFFSET_CAPTURE) === 1) {
+                return ['label' => $label, 'pattern' => $pattern, 'line' => self::lineAt($lineSource, (int) $match[0][1])];
+            }
+
+            return ['label' => $label, 'pattern' => $pattern, 'line' => 1];
         }
 
         // Hex escapes live inside string literals by definition, so stripping
         // would blind this check. Density does the work instead.
         if (self::suspiciousHexCount($code) >= 6) {
-            return ['label' => 'hex-encoded string', 'pattern' => self::HEX_PATTERN];
+            $line = 1;
+            if (preg_match(self::HEX_PATTERN, $code, $hexMatch, PREG_OFFSET_CAPTURE) === 1) {
+                $line = self::lineAt($code, (int) $hexMatch[0][1]);
+            }
+
+            return ['label' => 'hex-encoded string', 'pattern' => self::HEX_PATTERN, 'line' => $line];
         }
 
         return null;
@@ -110,6 +127,38 @@ final class PhpPayloadPatterns
         }
 
         return $count;
+    }
+
+    /**
+     * Same stripping as stripStringsAndComments(), but every removed byte is
+     * replaced with a space (newlines preserved), so offsets and line numbers
+     * still match the original source. Used only for reporting a match line.
+     */
+    private static function stripStringsAndCommentsPreservingLines(string $code): string
+    {
+        if (!str_contains($code, '<?')) {
+            $code = '<?php ' . $code;
+        }
+        $out = '';
+        foreach (token_get_all($code) as $token) {
+            if (is_string($token)) {
+                $out .= $token;
+                continue;
+            }
+            [$id, $text] = $token;
+            if (in_array($id, [T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE, T_COMMENT, T_DOC_COMMENT, T_INLINE_HTML], true)) {
+                $out .= preg_replace('/[^\n]/', ' ', $text) ?? '';
+                continue;
+            }
+            $out .= $text;
+        }
+
+        return $out;
+    }
+
+    private static function lineAt(string $source, int $offset): int
+    {
+        return substr_count(substr($source, 0, $offset), "\n") + 1;
     }
 
     /**
