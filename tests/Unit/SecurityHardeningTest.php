@@ -6,6 +6,7 @@ namespace Rampart\QualityChecker\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Rampart\QualityChecker\Analyzers\Security\AuthHardeningAnalyzer;
+use Rampart\QualityChecker\Analyzers\Security\InsecureHashAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\MassAssignmentAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\ObfuscatedAnalyzer;
 use Rampart\QualityChecker\Analyzers\Security\UnsafeDeserializationAnalyzer;
@@ -142,6 +143,30 @@ final class SecurityHardeningTest extends TestCase
         ) {
             self::assertCount(1, (new ObfuscatedAnalyzer())->analyze([$file]));
         }
+    }
+
+    public function testInsecureHashFlagsSmallRandomIntRangeForToken(): void
+    {
+        $file = $this->file(
+            'app/OtpService.php',
+            "<?php\nclass OtpService {\n    public function generate(): int {\n        \$otp = random_int(0, 9);\n        return \$otp;\n    }\n}\n"
+        );
+
+        $issues = (new InsecureHashAnalyzer())->analyze([$file]);
+
+        self::assertNotEmpty($issues);
+        self::assertSame(Severity::Warning, $issues[0]->severity);
+        self::assertStringContainsString('10 possible values', $issues[0]->message);
+    }
+
+    public function testInsecureHashFlagsHashHmacWeakAlgorithmForPassword(): void
+    {
+        $file = $this->file(
+            'app/PasswordService.php',
+            "<?php\nclass PasswordService {\n    public function fingerprint(string \$password): string {\n        return hash_hmac('md5', \$password, 'key');\n    }\n}\n"
+        );
+
+        self::assertNotEmpty((new InsecureHashAnalyzer())->analyze([$file]));
     }
 
     public function testWpRulesSkipTestFixtures(): void
